@@ -19,10 +19,10 @@ int main(void){
 	scanf("%d", &n);
 	if (n < 1) return 0;
 
-	int* p = (int *) calloc(sizeof(int), n);
+	int* p = (int *) calloc(sizeof(int), n - 1);
 
-	start = n;
-	fin = n;
+	start = n - 1;
+	fin = n - 1;
 
 	int c;
 
