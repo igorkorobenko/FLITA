@@ -2,39 +2,14 @@
 #include <string.h>
 #include <stdlib.h>
 
-char* getarr_f(void){
-    int n = 1;
-    char *arr;
-    char c;
-    arr = calloc(n + 1, sizeof(char));
-    int i = 0;
-
-    while((c = getchar()) != '\n'){
-        if( ('0' <= c && c <= '9') || ('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z')){
-            char *temp_arr;
-            n++;
-            temp_arr = calloc(n + 1, sizeof(char));
-            
-            for(int j = 0; j < n - 1; j++){
-                temp_arr[j] = arr[j];
-            }
-            temp_arr[n-1] = c;
-
-            free(arr);
-            arr = temp_arr;
-        }
-    }
-    arr[n-1]='\0';
-    return arr;
-}
-
-
 int main(void){
 
-	int bg;
+	int bg = -1;
+	while ((bg != 1) && (bg != 0)){
 	printf("0 - for graph\n");
 	printf("1 - for digraph\n");
 	scanf("%d", &bg);
+	}
 
 	int n;
 	printf("Num of elements: ");
@@ -59,50 +34,42 @@ int main(void){
 
 	for (int i = 0; i < n; i++){
 		printf("#%d ", i + 1);
-		names[i] = getarr_f();
-		printf("\n");
-
-		for (int j = 0; j < i; j++){
-			if(strcmp(names[n], names[j]) == 0){
-				printf("There are similar elements, enter another...\n");
-                i--;
-			}
-		}
+		char *s = malloc(20 * sizeof(char));
+		scanf("%s", s);
+		names[i] = s;
 	}
 
-	printf("Names:\n");
-	for (int i = 0; i < n; i++){
-		printf("#%d: %s\n", i + 1, names[i]);
-	}
 	putchar('\n');
 
 	printf("Connections\n");
 
 	printf("Example:\n");
-	printf("lol;\n");
-	printf("ye;\n\n");
+	printf("lol\n");
+	printf(";\n\n");
 
 	for (int i = 0; i < n; i++){
 		printf("#%d: %s\n", i + 1, names[i]);
 		_Bool flag = 1;
 
 		while(flag){
-			char* cmp_sting;
-			cmp_sting = getarr_f();
+			char* cmp_sting = malloc(20 * sizeof(char));
+			scanf("%s", cmp_sting);
 
 			for(int j = 0; j < n; j++){
 				if (strcmp(names[j], cmp_sting) == 0){
 					mtx[i][j]++;
+					if(bg == 0){
+						mtx[j][i]++;
+					}
 				}
 			}
-
-			if(strcmp(cmp_sting, "") == 0){
+			if(strcmp(cmp_sting, ";") == 0){
 				flag = 0;
 			}
-
 			free(cmp_sting);
 		}	
 	}
+
 
 	// проверка на связанность графа (крест)
 
@@ -127,39 +94,54 @@ int main(void){
 	}
 
 	for(int i = 0; i < n; i++){
-		printf("#%d %20s: ", i + 1, names[i]);
-		for(int j = 0; j < n; j++){
+		printf("#%d %10s: ", i + 1, names[i]);
 			for(int k = 0; k < n; k++){
-				printf("%d\n", mtx[i][j]);
+				printf("%d ", mtx[i][k]);
 			}
-		}
+			printf("\n");
 	}
 
-	char* arr = calloc(1000, sizeof(char));
+	char* arr = calloc(500, sizeof(char));
 	if(bg == 1){
-		strcpy(arr, "digraph{");
-	}
-	else {
-		strcpy(arr, "greph{");
-	}
-	for(int i = 0; i < n; i++){
+		strcat(arr, "echo \"digraph G {");
+		for(int i = 0; i < n; i++){
 		for(int j = 0; j < n; j++){
 			if(mtx[i][j] == 1){
-				for(int a; a < j; a++){
-					strcpy(arr, names[i]);
-					if(bg == 1){
-						strcpy(arr, "->");
-					}
-					else if(bg == 0){
-						strcpy(arr, "--");
-					}
+				for(int a = 0; a < mtx[i][j]; a++){
+					strcat(arr, names[i]);
+					strcat(arr, "->");
+					strcat(arr, names[j]);
+					strcat(arr, ";");
 				}
-				strcpy(arr, names[j]);
 			}
 		}
 	}
-	strcpy(arr, "}");
+	}
+	else {
+		strcat(arr, "echo \"graph G {");
+		for(int i = 0; i < n; i++){
+			strcat(arr, names[i]);
+			strcat(arr, ";");
+		}
+		for(int i = 0; i < n; i++){
+			for(int j = i; j < n; j++){
+				if(mtx[i][j] == 1){
+					for(int a = 0; a < mtx[i][j]; a++){
+						strcat(arr, names[i]);
+						strcat(arr, "--");
+						strcat(arr, names[j]);
+						strcat(arr, ";");
+					}
+				}
+			}
+		}
+		}
+
+
+	strcat(arr, "}\" | dot -Tpng >./graph_pikcha.png");
+	printf("%s\n", arr);
 	system(arr);
 	free(arr);
 
+	return 0;
 }
